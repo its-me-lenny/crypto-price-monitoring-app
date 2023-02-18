@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import CoinSearch from "../components/CoinSearch";
 import Trending from "../components/Trending";
 

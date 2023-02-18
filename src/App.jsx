@@ -1,14 +1,14 @@
-import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import { ThemeProvider } from "./context/ThemeContext";
 import Home from "./routes/Home";
 import SignIn from "./routes/SignIn";
 import SignUp from "./routes/SignUp";
 import Account from "./routes/Account";
 import CoinPage from "./routes/CoinPage";
+import Footer from "./components/Footer";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Footer from "./components/Footer";
+import { Route, Routes } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
 import { AuthContextProvider } from "./context/AuthContext";
 
 function App() {
