@@ -4,30 +4,55 @@ import { Link } from "react-router-dom";
 import { Sparklines, SparklinesLine } from "react-sparklines";
 import { userAuth } from "../context/AuthContext";
 import { db } from "../firebase";
-import { arrayUnion, doc, updateDoc, onSnapshot } from "firebase/firestore";
+import {
+  arrayUnion,
+  doc,
+  updateDoc,
+  onSnapshot,
+  arrayRemove,
+} from "firebase/firestore";
 
 const CoinItem = ({ coin }) => {
   const [savedCoin, setSavedCoin] = useState(false);
   const { user } = userAuth();
   const coinPath = doc(db, "users", `${user?.email}`);
 
-  const saveCoin = async () => {
+  /**
+   * Saves or deletes the coin in the user's watchlist in the Firestore DB.
+   */
+  const saveOrRemoveCoin = async () => {
     if (user?.email) {
-      setSavedCoin(true);
-      await updateDoc(coinPath, {
-        watchList: arrayUnion({
-          id: coin.id,
-          name: coin.name,
-          image: coin.image,
-          rank: coin.market_cap_rank,
-          symbol: coin.symbol,
-        }),
-      });
+      if (savedCoin) {
+        setSavedCoin(false);
+        await updateDoc(coinPath, {
+          watchList: arrayRemove({
+            id: coin.id,
+            name: coin.name,
+            image: coin.image,
+            rank: coin.market_cap_rank,
+            symbol: coin.symbol,
+          }),
+        });
+      } else {
+        setSavedCoin(true);
+        await updateDoc(coinPath, {
+          watchList: arrayUnion({
+            id: coin.id,
+            name: coin.name,
+            image: coin.image,
+            rank: coin.market_cap_rank,
+            symbol: coin.symbol,
+          }),
+        });
+      }
     } else {
       alert("Please sign in to save a coin to your watch list");
     }
   };
 
+  /**
+   * Checks if the coin is currently in the user's watchlist
+   */
   const isStarred = (watchList) => {
     const filteredCoinList = watchList.filter((token) => {
       return token.id === coin.id;
@@ -40,38 +65,31 @@ const CoinItem = ({ coin }) => {
     }
   };
 
+  /**
+   * Fetches the users saved watchlist of coins from the Firestore DB
+   */
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      doc(db, "users", `${user?.email}`),
-      (doc) => {
-        if (doc.exists) {
-          const watchList = doc.data()?.watchList;
-          console.log("uno");
-          isStarred(watchList);
-        }
-      },
-      (error) => {
-        if (error.code === "permission-denied") {
-          {
-            /* The user needs to log in first.*/
-            isStarred([]);
+    if (user?.email) {
+      const unsubscribe = onSnapshot(
+        doc(db, "users", `${user?.email}`),
+        (doc) => {
+          if (doc.exists) {
+            const watchList = doc.data()?.watchList;
+            isStarred(watchList);
           }
-          return;
-        } else {
-          throw new Error(error);
         }
-      }
-    );
+      );
 
-    return () => {
-      unsubscribe();
-    };
+      return () => {
+        unsubscribe();
+      };
+    }
   }, [user?.email]);
 
   return (
     <tr className="h-[80px] border-b overflow-hidden">
-      <td onClick={saveCoin} className="cursor-pointer">
-        {savedCoin ? <AiFillStar /> : <AiOutlineStar />}
+      <td onClick={saveOrRemoveCoin} className="cursor-pointer">
+        {user && (savedCoin ? <AiFillStar /> : <AiOutlineStar />)}
       </td>
       <td>{coin.market_cap_rank}</td>
       <td>

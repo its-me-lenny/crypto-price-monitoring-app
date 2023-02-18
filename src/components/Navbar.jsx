@@ -38,6 +38,8 @@ const Navbar = () => {
       <div className="hidden md:block">
         <ThemeToggle />
       </div>
+
+      {/* Navigation items on large screens */}
       {user?.email ? (
         location.pathname === "/account" ? (
           <div className="invisible md:visible">
@@ -74,9 +76,13 @@ const Navbar = () => {
           </Link>
         </div>
       )}
+
+      {/* Hamburger Menu */}
       <div onClick={handleNav} className="block md:hidden cursor-pointer z-10">
         {nav ? <AiOutlineClose size={20} /> : <AiOutlineMenu size={20} />}
       </div>
+
+      {/* Navigation items on sidebar (if mobile view)*/}
       <div
         className={
           nav

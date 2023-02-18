@@ -4,7 +4,7 @@ import axios from "axios";
 const Trending = () => {
   const [trending, setTrending] = useState([]);
 
-  const url = import.meta.env.VITE_TRENDING_URL;
+  const url = "https://api.coingecko.com/api/v3/search/trending";
 
   useEffect(() => {
     axios.get(url).then((response) => {

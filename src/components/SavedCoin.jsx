@@ -8,7 +8,11 @@ import { userAuth } from "../context/AuthContext";
 const SavedCoin = () => {
   const [coins, setCoins] = useState([]);
   const { user } = userAuth();
+  const coinPath = doc(db, "users", `${user?.email}`);
 
+  /**
+   * Fetches the users saved watchlist of coins from the Firestore DB
+   */
   useEffect(() => {
     const unsubscribe = onSnapshot(
       doc(db, "users", `${user?.email}`),
@@ -22,7 +26,9 @@ const SavedCoin = () => {
     };
   }, [user?.email]);
 
-  const coinPath = doc(db, "users", `${user?.email}`);
+  /**
+   * Saves or deletes the coin in the user's watchlist in the Firestore DB.
+   */
   const deleteCoin = async (passedId) => {
     try {
       const result = coins.filter((items) => items.id !== passedId);
@@ -53,36 +59,38 @@ const SavedCoin = () => {
             </tr>
           </thead>
           <tbody>
-            {coins?.map((coin) => {
-              return (
-                <tr key={coin.id} className="h-[60px] overflow-hidden">
-                  <td>{coin?.rank}</td>
-                  <td>
-                    <Link to={`/coin/${coin.id}`}>
-                      <div className="flex items-center">
-                        <img
-                          className="w-8 mr-4 "
-                          src={coin?.image}
-                          alt={coin?.id}
-                        />
-                        <div>
-                          <p className="hidden sm:table-cell">{coin.name}</p>
-                          <p className="text-gray-500 text-left text-sm">
-                            {coin?.symbol.toUpperCase()}
-                          </p>
+            {coins
+              .sort((a, b) => a.rank - b.rank)
+              .map((coin) => {
+                return (
+                  <tr key={coin.id} className="h-[60px] overflow-hidden">
+                    <td>{coin?.rank}</td>
+                    <td>
+                      <Link to={`/coin/${coin.id}`}>
+                        <div className="flex items-center">
+                          <img
+                            className="w-8 mr-4 "
+                            src={coin?.image}
+                            alt={coin?.id}
+                          />
+                          <div>
+                            <p className="hidden sm:table-cell">{coin.name}</p>
+                            <p className="text-gray-500 text-left text-sm">
+                              {coin?.symbol.toUpperCase()}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  </td>
-                  <td className="pl-8">
-                    <AiOutlineClose
-                      onClick={() => deleteCoin(coin.id)}
-                      className="cursor-pointer"
-                    />
-                  </td>
-                </tr>
-              );
-            })}
+                      </Link>
+                    </td>
+                    <td className="pl-8">
+                      <AiOutlineClose
+                        onClick={() => deleteCoin(coin.id)}
+                        className="cursor-pointer"
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       )}
